@@ -129,7 +129,10 @@ requirements are met. Now let me show a live demo.
 
 ## 4. Live demo runbook (about 4 minutes)
 
-Switch from the slideshow to a Terminal window (keep the mic recording).
+Do the demo in VS Code, keeping the mic recording. Open the project folder in VS Code,
+open its integrated terminal (View menu, then Terminal, or press Control and backtick),
+and press `Cmd + B` to hide the left sidebar so only the terminal and the browser are on
+screen. The commands below are plain shell, so nothing about your tools appears.
 
 **Step A: run the whole pipeline with one command.** Say: "I will run the entire
 pipeline with a single command." Paste and run:
