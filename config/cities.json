@@ -1,0 +1,12 @@
+[
+  {"city": "Berlin",    "country": "DE", "latitude": 52.5200, "longitude": 13.4050},
+  {"city": "Munich",    "country": "DE", "latitude": 48.1374, "longitude": 11.5755},
+  {"city": "Paris",     "country": "FR", "latitude": 48.8566, "longitude": 2.3522},
+  {"city": "Madrid",    "country": "ES", "latitude": 40.4168, "longitude": -3.7038},
+  {"city": "Rome",      "country": "IT", "latitude": 41.9028, "longitude": 12.4964},
+  {"city": "London",    "country": "GB", "latitude": 51.5072, "longitude": -0.1276},
+  {"city": "Amsterdam", "country": "NL", "latitude": 52.3676, "longitude": 4.9041},
+  {"city": "Vienna",    "country": "AT", "latitude": 48.2082, "longitude": 16.3738},
+  {"city": "Warsaw",    "country": "PL", "latitude": 52.2297, "longitude": 21.0122},
+  {"city": "Lisbon",    "country": "PT", "latitude": 38.7223, "longitude": -9.1393}
+]

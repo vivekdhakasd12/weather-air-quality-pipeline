@@ -1,0 +1,17 @@
+version: 2
+
+seeds:
+  - name: cities
+    description: >
+      Static reference list of cities (the second data source). Provides the
+      country name, population and timezone used to enrich the real-time
+      readings in the marts.
+    columns:
+      - name: city
+        description: City name; primary key, also the join key to the readings.
+        tests:
+          - not_null
+          - unique
+      - name: country
+        tests:
+          - not_null

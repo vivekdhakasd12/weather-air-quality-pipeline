@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw weather + air quality readings loaded from Spark Parquet.
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
+    schema: "{{ env_var('BQ_RAW_DATASET', 'raw') }}"
+    tables:
+      - name: weather_readings
+        description: One row per city per observation, cleaned by the Spark job.

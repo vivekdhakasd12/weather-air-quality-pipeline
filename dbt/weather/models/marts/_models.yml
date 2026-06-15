@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: fct_weather_readings
+    description: Real-time readings joined with the static city reference.
+    columns:
+      - name: reading_id
+        description: Surrogate key, one per city per observation.
+        tests:
+          - not_null
+          - unique
+      - name: city
+        tests:
+          - not_null
+      - name: observed_at
+        tests:
+          - not_null
+
+  - name: agg_weather_by_city
+    description: Per-city weather KPIs.
+    columns:
+      - name: city
+        tests:
+          - not_null
+          - unique
+
+  - name: agg_air_quality_by_country
+    description: Per-country air quality KPIs.
+    columns:
+      - name: country
+        tests:
+          - not_null
+          - unique

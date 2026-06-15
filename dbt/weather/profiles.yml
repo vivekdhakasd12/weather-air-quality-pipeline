@@ -1,0 +1,16 @@
+# Kept inside the project so the pipeline runs with:  dbt run --profiles-dir .
+# Every connection value comes from config/settings.env via env_var(), so there
+# are no secrets in this file.
+weather:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: "{{ env_var('BQ_DBT_DATASET', 'weather') }}"
+      location: "{{ env_var('BQ_LOCATION', 'US') }}"
+      keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"
+      threads: 4
+      timeout_seconds: 300
+      priority: interactive

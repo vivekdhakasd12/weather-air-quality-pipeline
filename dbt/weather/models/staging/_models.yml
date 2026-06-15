@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_weather
+    description: Cleaned, de-duplicated real-time readings (one row per city per hour).
+    columns:
+      - name: city
+        tests:
+          - not_null
+          # Every city in the readings must exist in the static reference.
+          - relationships:
+              arguments:
+                to: ref('stg_cities')
+                field: city
+      - name: observed_at
+        tests:
+          - not_null
+      - name: aqi_category
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["Good", "Fair", "Moderate", "Poor", "Very poor", "Extremely poor", "Unknown"]
+
+  - name: stg_cities
+    description: Cleaned static city reference.
+    columns:
+      - name: city
+        tests:
+          - not_null
+          - unique

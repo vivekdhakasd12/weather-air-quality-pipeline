@@ -1,0 +1,43 @@
+# Secrets: never commit the service account key
+config/dbt-sa-key.json
+*.json.key
+*-sa-key.json
+
+# Python virtual environments
+.venv-pipeline/
+airflow/.venv-airflow/
+
+# Local pipeline data
+data/landing/*
+data/processed/*
+data/checkpoints/*
+!data/landing/.gitkeep
+!data/processed/.gitkeep
+!data/checkpoints/.gitkeep
+
+# Airflow runtime
+airflow/logs/
+airflow/airflow.db
+airflow/airflow.cfg
+airflow/standalone_admin_password.txt
+airflow/webserver_config.py
+
+# dbt
+dbt/weather/target/
+dbt/weather/dbt_packages/
+dbt/weather/logs/
+
+# Python caches
+__pycache__/
+*.pyc
+.DS_Store
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# Presentation backup of the old deck
+presentation/DM2_Weather_Pipeline_orange_old.pptx
+
+# Runtime artifacts
+airflow/*.pid
+dbt/weather/.user.yml
