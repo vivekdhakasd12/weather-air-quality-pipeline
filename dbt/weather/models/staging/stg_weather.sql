@@ -1,8 +1,3 @@
--- Staging for the real-time readings.
--- Renames columns to clear, unit-bearing names and performs the authoritative
--- cross-run deduplication: if the same (city, observed_at) was polled more than
--- once, keep only the most recently ingested copy.
-
 with source as (
     select * from {{ source('raw', 'weather_readings') }}
 ),

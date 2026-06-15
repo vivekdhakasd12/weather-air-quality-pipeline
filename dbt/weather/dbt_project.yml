@@ -17,10 +17,8 @@ clean-targets:
 models:
   weather:
     staging:
-      # Staging stays lightweight: views over the raw source.
       +materialized: view
     marts:
-      # Marts are persisted as tables so dashboards read them fast.
       +materialized: table
 
 seeds:

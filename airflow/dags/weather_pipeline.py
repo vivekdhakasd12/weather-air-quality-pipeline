@@ -1,14 +1,3 @@
-"""Airflow DAG: weather_pipeline.
-
-Runs the whole chain every 5 minutes:
-
-    ingest -> spark_clean -> load_bigquery -> dbt_run -> dbt_test
-
-Each task is a BashOperator that sources config/settings.env and then shells
-into the isolated .venv-pipeline interpreter. Airflow itself lives in its own
-.venv-airflow, so Airflow's dependencies never collide with PySpark / dbt.
-"""
-
 from __future__ import annotations
 
 from datetime import datetime, timedelta
@@ -16,15 +5,11 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 
-# Absolute path because Airflow may run from anywhere. settings.env exports
-# PROJECT_ROOT, which every command below then reuses.
 SETTINGS = "/Users/dev/Agentic Workflows /dm2-weather-pipeline/config/settings.env"
 
-
 def step(command: str) -> str:
-    """Wrap a command so it fails fast and has the project env loaded."""
-    return f'set -euo pipefail\nsource "{SETTINGS}"\n{command}'
 
+    return f'set -euo pipefail\nsource "{SETTINGS}"\n{command}'
 
 default_args = {
     "owner": "dm2",
@@ -36,10 +21,10 @@ with DAG(
     dag_id="weather_pipeline",
     description="Weather + air quality: ingest, Spark clean, load BigQuery, dbt.",
     default_args=default_args,
-    schedule="*/5 * * * *",  # every 5 minutes
+    schedule="*/5 * * * *",
     start_date=datetime(2026, 1, 1),
     catchup=False,
-    max_active_runs=1,  # never let two runs overlap
+    max_active_runs=1,
     tags=["dm2", "weather", "bigquery", "spark", "dbt"],
 ) as dag:
 

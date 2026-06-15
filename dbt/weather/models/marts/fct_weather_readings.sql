@@ -1,7 +1,3 @@
--- Fact table: every cleaned reading enriched with static city attributes.
--- This is the join of the two data sources (real-time readings + static seed)
--- and the central table the aggregates build on.
-
 with weather as (
     select * from {{ ref('stg_weather') }}
 ),
@@ -11,7 +7,7 @@ cities as (
 )
 
 select
-    -- Deterministic surrogate key, one per city per observation.
+
     to_hex(md5(concat(weather.city, '|', cast(weather.observed_at as string)))) as reading_id,
 
     weather.city,

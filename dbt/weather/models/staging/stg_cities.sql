@@ -1,5 +1,3 @@
--- Staging for the static city reference (the dbt seed).
-
 select
     city,
     country,

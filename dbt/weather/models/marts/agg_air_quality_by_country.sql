@@ -1,5 +1,3 @@
--- KPI mart: air quality summary per country across all observations.
-
 select
     country,
     country_name,

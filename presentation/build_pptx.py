@@ -1,16 +1,3 @@
-"""Build the Data Management 2 final-project presentation (.pptx).
-
-Clean SRH exposé style (Lato, orange srh wordmark, thin rules, flat callouts),
-content = the real weather + air quality pipeline (Open-Meteo, Spark, BigQuery,
-dbt, Airflow) with the verified run results.
-
-Run with uv (the project has no pyproject, but --no-project is safe either way):
-    uv run --no-project --with python-pptx python presentation/build_pptx.py
-
-Output: presentation/DM2_Weather_Pipeline.pptx
-Writing rule: no em dashes (commas, colons, parentheses). En dash only in ranges.
-"""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -23,7 +10,6 @@ from pptx.oxml import parse_xml
 from pptx.oxml.ns import qn
 from pptx.util import Emu, Inches, Pt
 
-# ---- SRH exposé palette ----------------------------------------------------
 ORANGE = RGBColor(0xE6, 0x44, 0x15)
 INK = RGBColor(0x1A, 0x1A, 0x1A)
 GRAY = RGBColor(0x55, 0x55, 0x55)
@@ -40,7 +26,7 @@ HERE = Path(__file__).resolve().parent
 LOGO = str(HERE / "srh_logo.jpg")
 LOGO_RATIO = 457 / 591
 
-ND = "–"  # en dash for ranges
+ND = "–"
 GE = "≥"
 
 SW = Inches(13.333)
@@ -51,8 +37,6 @@ prs.slide_width = SW
 prs.slide_height = SH
 BLANK = prs.slide_layouts[6]
 
-
-# ---- helpers ---------------------------------------------------------------
 def _no_shadow(shape):
     el = shape._element
     style = el.find(qn("p:style"))
@@ -62,14 +46,11 @@ def _no_shadow(shape):
     if spPr.find(qn("a:effectLst")) is None:
         spPr.append(parse_xml('<a:effectLst xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"/>'))
 
-
 def slide():
     return prs.slides.add_slide(BLANK)
 
-
 def R(txt, size=14, color=INK, bold=False, italic=False, font=FONT):
     return (txt, size, color, bold, italic, font)
-
 
 def text(s, x, y, w, h, paras, align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
          space_after=6, line_spacing=1.12):
@@ -97,7 +78,6 @@ def text(s, x, y, w, h, paras, align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
             run.font.name = font
     return tb
 
-
 def rule(s, x, y, w, color=RULE, pt=1.0):
     r = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, w, Pt(pt))
     r.fill.solid()
@@ -105,7 +85,6 @@ def rule(s, x, y, w, color=RULE, pt=1.0):
     r.line.fill.background()
     _no_shadow(r)
     return r
-
 
 def box(s, x, y, w, h, fill=None, line=None, pt=1.0, rounded=False):
     shp = MSO_SHAPE.ROUNDED_RECTANGLE if rounded else MSO_SHAPE.RECTANGLE
@@ -123,7 +102,6 @@ def box(s, x, y, w, h, fill=None, line=None, pt=1.0, rounded=False):
     _no_shadow(b)
     return b
 
-
 def arrow(s, x, y, w, h, color=ORANGE):
     a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, x, y, w, h)
     a.fill.solid()
@@ -132,16 +110,13 @@ def arrow(s, x, y, w, h, color=ORANGE):
     _no_shadow(a)
     return a
 
-
 def logo_small(s):
     w = Inches(0.95)
     s.shapes.add_picture(LOGO, Inches(0.6), Inches(0.46), width=w, height=Emu(int(w * LOGO_RATIO)))
 
-
 def pagenum(s, n):
     text(s, Inches(12.5), Inches(7.04), Inches(0.7), Inches(0.3), [[R(str(n), 10, RULE2)]],
          align=PP_ALIGN.RIGHT)
-
 
 def header(s, num, title, n):
     logo_small(s)
@@ -154,7 +129,6 @@ def header(s, num, title, n):
     pagenum(s, n)
     return Inches(2.5)
 
-
 def bullets(s, x, y, w, items, size=15, gap=9, lead=1.16):
     paras = []
     for txt, lvl in items:
@@ -164,9 +138,8 @@ def bullets(s, x, y, w, items, size=15, gap=9, lead=1.16):
             paras.append([R("      –  ", size - 1, ORANGE), R(txt, size - 1, GRAY)])
     return text(s, x, y, w, Inches(4.4), paras, space_after=gap, line_spacing=lead)
 
-
 def flow(s, y, items, box_h=1.15, fontsize=13, sub=11):
-    """Horizontal flow of outlined boxes with orange arrows between them."""
+
     n = len(items)
     gap = Inches(0.2)
     left = Inches(0.7)
@@ -186,7 +159,6 @@ def flow(s, y, items, box_h=1.15, fontsize=13, sub=11):
             ax = bx + bw + (int(gap) - int(Inches(0.16))) // 2
             arrow(s, Emu(ax), y + Emu(int(bh)) // 2 - Inches(0.08), Inches(0.16), Inches(0.16))
 
-
 def codebox(s, x, y, w, h, lines, caption=None):
     box(s, x, y, w, h, fill=CODEBG)
     top = y + Inches(0.18)
@@ -197,10 +169,6 @@ def codebox(s, x, y, w, h, lines, caption=None):
     text(s, x + Inches(0.25), top, w - Inches(0.5), h - Inches(0.4),
          [[R(ln, 11, INK, font=MONO)] for ln in lines], space_after=1, line_spacing=1.05)
 
-
-# ===========================================================================
-# Slide 1: Title
-# ===========================================================================
 s = slide()
 lw = Inches(1.55)
 s.shapes.add_picture(LOGO, Emu(int((int(SW) - int(lw)) / 2)), Inches(1.05), width=lw,
@@ -225,10 +193,6 @@ text(s, Inches(1.0), Inches(5.5), Inches(11.33), Inches(1.5),
 text(s, Inches(1.0), Inches(6.95), Inches(11.33), Inches(0.35),
      [[R("June 2026", 12, RULE2)]], align=PP_ALIGN.CENTER)
 
-
-# ===========================================================================
-# Slide 2: Project goal
-# ===========================================================================
 s = slide()
 y = header(s, "1", "Project goal", 2)
 bullets(s, Inches(0.7), y, Inches(11.9), [
@@ -254,10 +218,6 @@ for i, (big, lab) in enumerate(stats):
     text(s, Emu(bx + int(Inches(0.1))), sy + Inches(1.18), Emu(int(sw_b) - int(Inches(0.2))), Inches(0.6),
          [[R(seg, 12, GRAY)] for seg in lab.split("\n")], align=PP_ALIGN.CENTER, space_after=0)
 
-
-# ===========================================================================
-# Slide 3: Architecture
-# ===========================================================================
 s = slide()
 y = header(s, "2", "Architecture and data flow", 3)
 flow(s, Inches(2.9), [
@@ -277,10 +237,6 @@ text(s, Inches(0.7), Inches(5.7), Inches(11.9), Inches(0.9),
        R(".venv-pipeline (Spark, dbt, BigQuery) and airflow/.venv-airflow (Airflow 2.10). "
          "Airflow tasks shell into the pipeline environment.", 13, GRAY)]], line_spacing=1.15)
 
-
-# ===========================================================================
-# Slide 4: Data sources
-# ===========================================================================
 s = slide()
 y = header(s, "3", "Data sources: two, one real-time", 4)
 box(s, Inches(0.7), y, Inches(5.8), Inches(3.4), fill=FAINT)
@@ -303,10 +259,6 @@ text(s, Inches(0.7), y + Inches(3.65), Inches(11.9), Inches(0.5),
      [[R("The two sources join on city: a fast-moving stream combined with slow-moving "
          "reference data, a classic curation pattern.", 13.5, INK, italic=True)]])
 
-
-# ===========================================================================
-# Slide 5: Extract
-# ===========================================================================
 s = slide()
 y = header(s, "4", "Extract: producer.py", 5)
 bullets(s, Inches(0.7), y, Inches(5.7), [
@@ -330,10 +282,6 @@ codebox(s, Inches(6.6), y, Inches(6.0), Inches(4.0), [
     "}",
 ], caption="data/landing/readings_*.json  (one line per city)")
 
-
-# ===========================================================================
-# Slide 6: Spark cleaning
-# ===========================================================================
 s = slide()
 y = header(s, "5", "Clean with Spark", 6)
 steps = [
@@ -361,10 +309,6 @@ codebox(s, Inches(6.6), y, Inches(6.0), Inches(3.7), [
     "  .dropDuplicates(['city','observed_at']))",
 ], caption="Spark Structured Streaming, Trigger.AvailableNow")
 
-
-# ===========================================================================
-# Slide 7: BigQuery load
-# ===========================================================================
 s = slide()
 y = header(s, "6", "Load into BigQuery", 7)
 bullets(s, Inches(0.7), y, Inches(6.0), [
@@ -392,10 +336,6 @@ text(s, Inches(7.2), y + Inches(0.22), Inches(5.2), Inches(3.5),
       [R("ingested_at              TIMESTAMP", 12.5, INK, font=MONO)]],
      space_after=4, line_spacing=1.1)
 
-
-# ===========================================================================
-# Slide 8: dbt transformation
-# ===========================================================================
 s = slide()
 y = header(s, "7", "Transform with dbt (ELT)", 8)
 flow(s, Inches(2.55), [
@@ -424,10 +364,6 @@ text(s, Inches(7.15), Inches(4.55), Inches(5.25), Inches(2.1),
       [R("          agg_air_quality_by_country", 12.5, INK, font=MONO)],
       [R("5 models built successfully.", 12.5, INK)]], space_after=5, line_spacing=1.14)
 
-
-# ===========================================================================
-# Slide 9: Data quality
-# ===========================================================================
 s = slide()
 y = header(s, "8", "Data quality: 17 tests, all pass", 9)
 tests = [
@@ -447,10 +383,6 @@ text(s, Inches(0.7), Inches(6.5), Inches(11.9), Inches(0.5),
      [[R("dbt test fails the Airflow task if any check fails, so bad data is caught before "
          "anyone trusts the KPIs.", 13.5, GRAY, italic=True)]])
 
-
-# ===========================================================================
-# Slide 10: Automation (Airflow) with real evidence
-# ===========================================================================
 s = slide()
 y = header(s, "9", "Automation: Apache Airflow", 10)
 flow(s, Inches(2.55), [
@@ -473,10 +405,6 @@ text(s, Inches(0.7), Inches(6.45), Inches(11.9), Inches(0.4),
      [[R("run_pipeline.sh runs the same six-step chain and can be scheduled with cron as a "
          "fallback.", 12.5, GRAY, italic=True)]])
 
-
-# ===========================================================================
-# Slide 11: Sample results
-# ===========================================================================
 s = slide()
 y = header(s, "10", "Sample results from the marts", 11)
 text(s, Inches(0.7), y - Inches(0.05), Inches(7.0), Inches(0.4),
@@ -514,10 +442,6 @@ text(s, Inches(7.4), y + Inches(0.6), Inches(5.0), Inches(3.0),
       [R("Counts grow every 5 minutes as new hourly observations arrive, so the averages "
          "become richer over time.", 13, GRAY)]], space_after=9, line_spacing=1.14)
 
-
-# ===========================================================================
-# Slide 12: Requirement mapping
-# ===========================================================================
 s = slide()
 y = header(s, "11", "How each requirement is met", 12)
 mapping = [
@@ -541,7 +465,6 @@ for i, (a, b) in enumerate(mapping):
     text(s, Inches(0.9), ty + Inches(0.12), Inches(4.3), Inches(0.45), [[R(a, 13.5, col, bold=True)]])
     text(s, Inches(5.3), ty + Inches(0.12), Inches(7.1), Inches(0.45), [[R(b, 13.5, col, bold=head)]])
     ty = ty + rh
-
 
 out = HERE / "DM2_Weather_Pipeline.pptx"
 prs.save(str(out))

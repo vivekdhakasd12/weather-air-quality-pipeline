@@ -1,5 +1,3 @@
--- KPI mart: weather summary per city across all observations collected so far.
-
 select
     city,
     country,

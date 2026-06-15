@@ -1,6 +1,3 @@
-# Kept inside the project so the pipeline runs with:  dbt run --profiles-dir .
-# Every connection value comes from config/settings.env via env_var(), so there
-# are no secrets in this file.
 weather:
   target: dev
   outputs:

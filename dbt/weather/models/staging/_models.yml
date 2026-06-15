@@ -7,7 +7,6 @@ models:
       - name: city
         tests:
           - not_null
-          # Every city in the readings must exist in the static reference.
           - relationships:
               arguments:
                 to: ref('stg_cities')
