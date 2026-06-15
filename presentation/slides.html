@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Real-Time Weather and Air Quality Data Pipeline · Data Management 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#E64415; --ink:#1a1a1a; --gray:#555555; --rule:#e3e3e3;
+    --rule2:#bbbbbb; --faint:#faf6f4; --code:#f4f4f4;
+  }
+  @page{size:1280px 720px; margin:0;}
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:#d7d7d7; font-family:'Lato',Arial,sans-serif; color:var(--ink); padding:26px;}
+  .deck{display:flex; flex-direction:column; align-items:center; gap:26px;}
+  .slide{
+    width:1280px; height:720px; background:#fff; padding:50px 64px;
+    position:relative; overflow:hidden; box-shadow:0 1px 8px rgba(0,0,0,.18);
+  }
+  @media print{
+    body{background:#fff; padding:0;}
+    .deck{gap:0;}
+    .slide{box-shadow:none; page-break-after:always;}
+  }
+  /* header pattern on content slides */
+  .logo-sm{height:46px; display:block;}
+  .head{display:flex; align-items:baseline; gap:18px; margin-top:30px;}
+  .head .num{color:var(--orange); font-weight:900; font-size:34px; line-height:1;}
+  .head .title{font-weight:700; font-size:34px; line-height:1.1;}
+  hr.rule{border:none; border-top:1px solid var(--rule); margin:16px 0 30px;}
+  .pagenum{position:absolute; bottom:22px; right:30px; color:var(--rule2); font-size:14px;}
+  /* bullets */
+  ul.b{list-style:none;}
+  ul.b li{position:relative; padding-left:28px; margin-bottom:16px; font-size:21px; line-height:1.45;}
+  ul.b li::before{content:"\2022"; color:var(--orange); font-weight:700; position:absolute; left:2px;}
+  ul.b li.sub{padding-left:54px; color:var(--gray); font-size:19px; margin-bottom:9px;}
+  ul.b li.sub::before{content:"\2013"; left:28px;}
+  .note{font-size:18px; color:var(--gray); font-style:italic; line-height:1.4;}
+  /* callout box */
+  .box{background:var(--faint); border-left:6px solid var(--orange); padding:20px 26px;}
+  .box h3{color:var(--orange); font-size:21px; margin-bottom:8px;}
+  .box p{font-size:18px; line-height:1.45; margin-bottom:8px;}
+  .box p:last-child{margin-bottom:0;}
+  .lead{color:var(--orange); font-weight:700;}
+  .cols{display:flex; gap:30px;}
+  .cols > *{flex:1;}
+  /* stat row */
+  .stats{display:flex; gap:26px; margin-top:8px;}
+  .stat{flex:1; background:var(--faint); border-top:5px solid var(--orange); padding:24px 12px; text-align:center;}
+  .stat .big{color:var(--orange); font-weight:900; font-size:46px; line-height:1;}
+  .stat .lab{color:var(--gray); font-size:16px; margin-top:12px; line-height:1.3;}
+  /* flow */
+  .flow{display:flex; align-items:stretch; gap:8px;}
+  .flow .node{flex:1; border:1.6px solid var(--orange); border-radius:11px; padding:14px 8px; text-align:center; display:flex; flex-direction:column; justify-content:center;}
+  .flow .node .t{font-weight:700; font-size:17px; line-height:1.15;}
+  .flow .node .s{color:var(--gray); font-size:13px; margin-top:5px; line-height:1.2;}
+  .flow .arr{display:flex; align-items:center; color:var(--orange); font-weight:900; font-size:22px;}
+  .band{background:var(--orange); color:#fff; text-align:center; font-weight:700; font-size:19px; padding:16px; border-radius:6px;}
+  /* table */
+  table{width:100%; border-collapse:collapse;}
+  th{background:var(--orange); color:#fff; text-align:left; padding:13px 18px; font-size:18px; font-weight:700;}
+  td{padding:12px 18px; font-size:18px;}
+  tr:nth-child(even) td{background:var(--faint);}
+  .mono,code{font-family:'Courier New',monospace;}
+  .codebox{background:var(--code); padding:20px 24px; font-family:'Courier New',monospace; font-size:15px; line-height:1.55; white-space:pre; color:var(--ink);}
+  .codecap{color:var(--gray); font-style:italic; font-size:13px; margin-bottom:10px;}
+  /* title slide */
+  .title-slide{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0;}
+  .title-slide .logo-lg{height:118px; margin-bottom:30px;}
+  .kicker{letter-spacing:.18em; color:var(--gray); font-weight:700; font-size:16px;}
+  .title-slide h1{font-size:42px; font-weight:700; margin:18px 0; max-width:1000px;}
+  .subtitle{color:var(--orange); font-weight:700; font-size:22px;}
+  hr.rule-orange{border:none; border-top:3px solid var(--orange); width:120px; margin:28px auto;}
+  .identity{font-size:18px; color:var(--gray); line-height:1.7;}
+  .identity b{color:var(--ink);}
+  .date{color:var(--rule2); font-size:15px; margin-top:18px;}
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- Slide 1: Title -->
+  <section class="slide title-slide">
+    <img class="logo-lg" src="srh_logo.jpg" alt="SRH">
+    <div class="kicker">DATA MANAGEMENT 2 &nbsp; &middot; &nbsp; FINAL PROJECT</div>
+    <h1>Real-Time Weather and Air Quality Data Pipeline</h1>
+    <div class="subtitle">Open-Meteo &nbsp;&middot;&nbsp; Spark &nbsp;&middot;&nbsp; BigQuery &nbsp;&middot;&nbsp; dbt &nbsp;&middot;&nbsp; Airflow</div>
+    <hr class="rule-orange">
+    <div class="identity">
+      <div><b>Devendra Singh Dhakad</b> &nbsp;&middot;&nbsp; Matriculation No. 100004684</div>
+      <div>Data Management 2: Data Curation and Data Management</div>
+      <div>Examiner: Prof. Binh Vu</div>
+      <div>SRH University</div>
+    </div>
+    <div class="date">June 2026</div>
+  </section>
+
+  <!-- Slide 2: Project goal -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">1</span><span class="title">Project goal</span></div>
+    <hr class="rule">
+    <ul class="b">
+      <li>Build a complete, automated data pipeline that collects live weather and air quality for ten European cities, cleans and models the data, and serves analytics-ready tables in BigQuery.</li>
+      <li>It demonstrates the full data-curation lifecycle: real-time extraction, distributed cleaning, warehouse loading, SQL transformation with tests, and hands-off scheduling.</li>
+    </ul>
+    <div class="stats" style="margin-top:34px;">
+      <div class="stat"><div class="big">2</div><div class="lab">data sources<br>(one real-time)</div></div>
+      <div class="stat"><div class="big">10</div><div class="lab">European cities<br>polled live</div></div>
+      <div class="stat"><div class="big">5 min</div><div class="lab">automatic<br>run interval</div></div>
+      <div class="stat"><div class="big">6 / 6</div><div class="lab">exam requirements<br>met</div></div>
+    </div>
+    <div class="pagenum">2</div>
+  </section>
+
+  <!-- Slide 3: Architecture -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">2</span><span class="title">Architecture and data flow</span></div>
+    <hr class="rule">
+    <div class="flow" style="margin-top:34px;">
+      <div class="node"><div class="t">Open-Meteo APIs</div><div class="s">weather + air quality</div></div>
+      <div class="arr">&rarr;</div>
+      <div class="node"><div class="t">producer.py</div><div class="s">extract to JSON</div></div>
+      <div class="arr">&rarr;</div>
+      <div class="node"><div class="t">Spark</div><div class="s">clean to Parquet</div></div>
+      <div class="arr">&rarr;</div>
+      <div class="node"><div class="t">load_bigquery</div><div class="s">load to raw table</div></div>
+      <div class="arr">&rarr;</div>
+      <div class="node"><div class="t">dbt</div><div class="s">model + test</div></div>
+      <div class="arr">&rarr;</div>
+      <div class="node"><div class="t">Mart tables</div><div class="s">analytics ready</div></div>
+    </div>
+    <div class="band" style="margin-top:34px;">Apache Airflow runs every step, every 5 minutes (cron fallback: run_pipeline.sh)</div>
+    <p style="margin-top:30px; font-size:19px; line-height:1.5;"><b>Two isolated Python 3.11 environments keep dependencies apart:</b> <span style="color:var(--gray);">.venv-pipeline (Spark, dbt, BigQuery) and airflow/.venv-airflow (Airflow 2.10). Airflow tasks shell into the pipeline environment.</span></p>
+    <div class="pagenum">3</div>
+  </section>
+
+  <!-- Slide 4: Data sources -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">3</span><span class="title">Data sources: two, one real-time</span></div>
+    <hr class="rule">
+    <div class="cols">
+      <div class="box">
+        <h3>Source 1: Open-Meteo (real-time)</h3>
+        <p>Two free REST APIs, no key. Weather (temperature, humidity, wind, code) and air quality (PM10, PM2.5, European AQI, ozone).</p>
+        <p>Polled for 10 cities every 5 minutes, so the landing zone is a live, growing stream of observations.</p>
+      </div>
+      <div class="box">
+        <h3>Source 2: City reference (static)</h3>
+        <p>A curated CSV of the 10 cities (country, country name, latitude, longitude, population, timezone), loaded as a dbt seed.</p>
+        <p>Reference data that rarely changes. It enriches every reading and anchors a referential-integrity test.</p>
+      </div>
+    </div>
+    <p class="note" style="margin-top:30px;">The two sources join on city: a fast-moving stream combined with slow-moving reference data, a classic curation pattern.</p>
+    <div class="pagenum">4</div>
+  </section>
+
+  <!-- Slide 5: Extract -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">4</span><span class="title">Extract: producer.py</span></div>
+    <hr class="rule">
+    <div class="cols">
+      <ul class="b" style="flex:1;">
+        <li>Calls both Open-Meteo endpoints for each city and writes one newline-delimited JSON file per run into the landing zone.</li>
+        <li>timezone=UTC keeps every observation timestamp comparable.</li>
+        <li>Per-city try and except: one failed city does not abort the whole run.</li>
+        <li>The nesting is deliberate, so Spark does the real flattening downstream.</li>
+      </ul>
+      <div style="flex:1;">
+        <div class="codecap">data/landing/readings_*.json (one line per city)</div>
+        <div class="codebox">{
+  "city": "Berlin", "country": "DE",
+  "weather": {
+     "time": "2026-06-14T15:45",
+     "temperature_2m": 15.9,
+     "relative_humidity_2m": 64,
+     "wind_speed_10m": 20.8 },
+  "air_quality": {
+     "pm2_5": 2.4, "european_aqi": 26 },
+  "ingested_at": "2026-06-14T15:50:19Z"
+}</div>
+      </div>
+    </div>
+    <div class="pagenum">5</div>
+  </section>
+
+  <!-- Slide 6: Spark -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">5</span><span class="title">Clean with Spark</span></div>
+    <hr class="rule">
+    <div class="cols">
+      <ul class="b" style="flex:1;">
+        <li>Flatten the nested weather and air-quality blocks.</li>
+        <li>Cast every field to its proper type.</li>
+        <li>Parse the time string into a real timestamp.</li>
+        <li>Drop rows with null city, time or temperature.</li>
+        <li>Deduplicate by (city, observed_at) in the batch.</li>
+        <li>Derive aqi_category from the European AQI bands.</li>
+      </ul>
+      <div style="flex:1;">
+        <div class="codecap">Spark Structured Streaming, Trigger.AvailableNow</div>
+        <div class="codebox">cleaned = (batch_df.select(
+    F.col('city'),
+    F.to_timestamp(F.col('weather.time'),
+        "yyyy-MM-dd'T'HH:mm")
+      .alias('observed_at'),
+    F.col('weather.temperature_2m'))
+  .where(F.col('temperature_2m').isNotNull())
+  .dropDuplicates(['city','observed_at']))</div>
+      </div>
+    </div>
+    <div class="pagenum">6</div>
+  </section>
+
+  <!-- Slide 7: BigQuery load -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">6</span><span class="title">Load into BigQuery</span></div>
+    <hr class="rule">
+    <div class="cols">
+      <ul class="b" style="flex:1.05;">
+        <li>load_bigquery.py reads all cleaned Parquet and loads it into raw.weather_readings with WRITE_TRUNCATE.</li>
+        <li>Idempotent: running it twice gives the same table, no duplicates, so Airflow can safely retry.</li>
+        <li>Uses the google-cloud-bigquery client only. No gcloud CLI; auth via a service account key.</li>
+        <li>Verified: 30 rows loaded into the raw table.</li>
+      </ul>
+      <div class="box" style="flex:1;">
+        <h3 class="mono" style="font-size:18px;">raw.weather_readings</h3>
+        <div class="mono" style="font-size:15px; line-height:1.7; color:var(--ink); margin-top:6px;">city, country&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING<br>latitude, longitude&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT<br>observed_at&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TIMESTAMP<br>temperature_2m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT<br>relative_humidity_2m&nbsp;&nbsp;INTEGER<br>wind_speed_10m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT<br>pm10, pm2_5, ozone&nbsp;&nbsp;&nbsp;&nbsp;FLOAT<br>european_aqi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INTEGER<br>aqi_category&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING<br>ingested_at&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TIMESTAMP</div>
+      </div>
+    </div>
+    <div class="pagenum">7</div>
+  </section>
+
+  <!-- Slide 8: dbt -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">7</span><span class="title">Transform with dbt (ELT)</span></div>
+    <hr class="rule">
+    <div class="flow" style="margin-top:6px;">
+      <div class="node"><div class="t mono" style="font-size:15px;">raw.weather_readings</div><div class="s">source</div></div>
+      <div class="arr">&rarr;</div>
+      <div class="node"><div class="t mono" style="font-size:15px;">stg_weather</div><div class="s">staging (view)</div></div>
+      <div class="arr">&rarr;</div>
+      <div class="node"><div class="t mono" style="font-size:15px;">fct_weather_readings</div><div class="s">mart (table)</div></div>
+      <div class="arr">&rarr;</div>
+      <div class="node"><div class="t mono" style="font-size:15px;">agg_* KPIs</div><div class="s">mart (table)</div></div>
+    </div>
+    <p class="note" style="margin:18px 0;">The static seed (stg_cities) joins into fct_weather_readings to add country name and population.</p>
+    <div class="cols">
+      <div class="box">
+        <h3>Why ELT, not ETL</h3>
+        <p>Spark does only light cleaning. All business logic then runs as dbt SQL inside BigQuery: warehouse scale, version-controlled SQL, lineage, and built-in tests.</p>
+      </div>
+      <div class="box">
+        <h3>The models</h3>
+        <div class="mono" style="font-size:15px; line-height:1.7;">staging:&nbsp;&nbsp;stg_weather, stg_cities<br>marts:&nbsp;&nbsp;&nbsp;&nbsp;fct_weather_readings<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;agg_weather_by_city<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;agg_air_quality_by_country</div>
+        <p style="margin-top:8px;">5 models built successfully.</p>
+      </div>
+    </div>
+    <div class="pagenum">8</div>
+  </section>
+
+  <!-- Slide 9: Data quality -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">8</span><span class="title">Data quality: 17 tests, all pass</span></div>
+    <hr class="rule">
+    <table style="margin-top:6px;">
+      <tr><td style="background:var(--faint); border-left:6px solid var(--orange); width:280px;"><span class="mono lead" style="font-size:18px;">not_null</span></td><td>Key fields are never empty: city, observed_at, reading_id.</td></tr>
+      <tr><td style="background:var(--faint); border-left:6px solid var(--orange);"><span class="mono lead" style="font-size:18px;">unique</span></td><td>No duplicate keys: reading_id and city are unique in the marts.</td></tr>
+      <tr><td style="background:var(--faint); border-left:6px solid var(--orange);"><span class="mono lead" style="font-size:18px;">accepted_values</span></td><td>aqi_category is always one of the six European AQI bands.</td></tr>
+      <tr><td style="background:var(--faint); border-left:6px solid var(--orange);"><span class="mono lead" style="font-size:18px;">relationships</span></td><td>Every reading's city exists in the static city reference.</td></tr>
+    </table>
+    <p class="note" style="margin-top:28px;">dbt test fails the Airflow task if any check fails, so bad data is caught before anyone trusts the KPIs.</p>
+    <div class="pagenum">9</div>
+  </section>
+
+  <!-- Slide 10: Airflow -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">9</span><span class="title">Automation: Apache Airflow</span></div>
+    <hr class="rule">
+    <div class="flow" style="margin-top:6px;">
+      <div class="node"><div class="t">ingest</div></div><div class="arr">&rarr;</div>
+      <div class="node"><div class="t">spark_clean</div></div><div class="arr">&rarr;</div>
+      <div class="node"><div class="t">load_bigquery</div></div><div class="arr">&rarr;</div>
+      <div class="node"><div class="t">dbt_seed</div></div><div class="arr">&rarr;</div>
+      <div class="node"><div class="t">dbt_run</div></div><div class="arr">&rarr;</div>
+      <div class="node"><div class="t">dbt_test</div></div>
+    </div>
+    <p class="mono" style="text-align:center; color:var(--gray); font-size:15px; margin:18px 0;">schedule = '*/5 * * * *' &nbsp; catchup = False &nbsp; max_active_runs = 1 &nbsp; retries = 1</p>
+    <div class="box">
+      <p><span class="lead">Verified run:</span> the DAG executed end to end through Airflow. DagRun state = success; all six tasks (ingest, spark_clean, load_bigquery, dbt_seed, dbt_run, dbt_test) returned success.</p>
+      <p style="color:var(--gray);">dbt_seed loaded the cities, dbt_run built 5 models, dbt_test passed all 17 checks against BigQuery.</p>
+    </div>
+    <p class="note" style="margin-top:24px;">run_pipeline.sh runs the same six-step chain and can be scheduled with cron as a fallback.</p>
+    <div class="pagenum">10</div>
+  </section>
+
+  <!-- Slide 11: Results -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">10</span><span class="title">Sample results from the marts</span></div>
+    <hr class="rule">
+    <div class="cols">
+      <div style="flex:1.1;">
+        <p class="note" style="margin-bottom:14px;">Air quality by country (average European AQI, lower is better)</p>
+        <table>
+          <tr><th>Country</th><th>Avg PM2.5</th><th>Avg EAQI</th></tr>
+          <tr><td>Italy</td><td>4.7</td><td>45.0</td></tr>
+          <tr><td>Portugal</td><td>9.7</td><td>41.0</td></tr>
+          <tr><td>Spain</td><td>6.1</td><td>40.0</td></tr>
+          <tr><td>France</td><td>4.4</td><td>34.0</td></tr>
+          <tr><td>Germany</td><td>3.0</td><td>29.5</td></tr>
+          <tr><td>Poland</td><td>4.3</td><td>26.5</td></tr>
+        </table>
+      </div>
+      <div class="box" style="flex:1;">
+        <h3>Highlights</h3>
+        <p>Hottest city: Madrid, 31.8 C average</p>
+        <p>Coolest city: Warsaw, 13.25 C average</p>
+        <p>Worst air quality: Italy (EAQI 45)</p>
+        <p>Best air quality: Poland (EAQI 26.5)</p>
+        <p style="color:var(--gray);">Counts grow every 5 minutes as new hourly observations arrive, so the averages become richer over time.</p>
+      </div>
+    </div>
+    <div class="pagenum">11</div>
+  </section>
+
+  <!-- Slide 12: Requirement mapping -->
+  <section class="slide">
+    <img class="logo-sm" src="srh_logo.jpg" alt="SRH">
+    <div class="head"><span class="num">11</span><span class="title">How each requirement is met</span></div>
+    <hr class="rule">
+    <table style="margin-top:6px;">
+      <tr><th style="width:38%;">Requirement</th><th>Where it is implemented</th></tr>
+      <tr><td><b>1. Two sources, one real-time</b></td><td>Open-Meteo APIs (real-time) + city reference seed (static)</td></tr>
+      <tr><td><b>2. Extract, clean, load to BigQuery</b></td><td>producer.py, spark_clean.py, load_bigquery.py</td></tr>
+      <tr><td><b>3. Transformation with dbt</b></td><td>seed + staging + marts, all SQL inside BigQuery (ELT)</td></tr>
+      <tr><td><b>4. Include Spark</b></td><td>Spark Structured Streaming cleaning job</td></tr>
+      <tr><td><b>5. Runs automatically</b></td><td>Airflow DAG every 5 min (cron fallback: run_pipeline.sh)</td></tr>
+      <tr><td><b>6. Presentation</b></td><td>this deck: sources, cleaning, transformation explained</td></tr>
+    </table>
+    <div class="pagenum">12</div>
+  </section>
+
+</div>
+</body>
+</html>
