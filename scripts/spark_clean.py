@@ -134,6 +134,10 @@ def main() -> int:
         .master("local[*]")
         .config("spark.sql.shuffle.partitions", "4")
         .config("spark.ui.enabled", "false")
+        # Force the local filesystem. Some machines have Hadoop/HDFS configured
+        # (via HADOOP_CONF_DIR), which makes Spark default to hdfs://localhost:9000
+        # and fail with "Connection refused". This pins every path to local disk.
+        .config("spark.hadoop.fs.defaultFS", "file:///")
         # Open-Meteo returns UTC times as naive strings ("2026-06-14T15:45").
         # Pin the session timezone to UTC so to_timestamp does not shift them
         # into the machine's local zone.

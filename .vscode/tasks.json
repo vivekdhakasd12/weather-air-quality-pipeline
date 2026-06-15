@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Demo: run weather pipeline",
+      "type": "shell",
+      "command": "source config/settings.env && ./scripts/run_pipeline.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}
