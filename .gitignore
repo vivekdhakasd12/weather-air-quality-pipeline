@@ -34,6 +34,7 @@ __pycache__/
 
 # Claude Code local settings (machine-specific)
 .claude/settings.local.json
+.claude/launch.json
 
 # Presentation backup of the old deck
 presentation/DM2_Weather_Pipeline_orange_old.pptx
@@ -41,3 +42,9 @@ presentation/DM2_Weather_Pipeline_orange_old.pptx
 # Runtime artifacts
 airflow/*.pid
 dbt/weather/.user.yml
+
+# Presentation screen recordings (over GitHub's 100 MB file limit, do not push)
+presentation/*.mov
+
+# Dashboard flat export (regenerable via the ETL; only the parquet is committed)
+dashboard/data/*.csv
